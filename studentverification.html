@@ -136,7 +136,7 @@
             const registrationNumber = document.getElementById('registrationNumberInput').value;
     
             try {
-                const response = await fetch(`https://vlgestudentverify.onrender.com/${registrationNumber}`);
+                const response = await fetch(`https://vlgestudentverify.onrender.com/api/student/${registrationNumber}`);
                 const detailsSection = document.getElementById('detailsSection');
                 
                 if (response.ok) {
@@ -173,7 +173,7 @@
     
             try {
                 // Use fetch with 'blob' response type for PDF download
-                const response = await fetch(`https://vlgestudentverify.onrender.com/${registrationNumber}`, {
+                const response = await fetch(`https://vlgestudentverify.onrender.com/api/student/${registrationNumber}`, {
                     method: 'GET',
                 });
     
