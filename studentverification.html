@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Verification</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts Lora -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* General Body Styling */
+        body {
+            font-family: 'Lora', serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Header Styling */
+        header {
+            background-color: #f8f9fa;
+            padding: 3rem 0;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .company-logo {
+            width: 200px;
+            height: auto;
+            max-width: 100%;
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background-color: #343a40;
+        }
+
+        .navbar .nav-link {
+            color: #ffffff !important;
+        }
+
+        .navbar .dropdown-menu {
+            background-color: #343a40;
+            border: none;
+        }
+
+        .navbar .dropdown-item {
+            color: #ffffff !important;
+        }
+
+        .navbar .dropdown-item:hover {
+            background-color: #495057;
+        }
+
+        /* Form Section Styling */
+        .form-section {
+            margin: 3rem 0;
+        }
+
+        .form-section h1 {
+            color: #343a40;
+            font-weight: bold;
+        }
+
+        .input-group .form-control {
+            border-radius: 0;
+        }
+
+        /* Student Details Card */
+        .details-section .card {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border: none;
+        }
+
+        /* Fade-in Animation */
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 1.5s ease-in forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+   
+    <div class="container">
+        <!-- Student Verification Form -->
+        <div class="form-section text-center my-5">
+            <h1>WELCOME TO VLGE STUDENT VERIFICATION PANNEL</h1>
+            <p><b>ENTER YOUR REGISTRATION NUMBER TO VERIFY YOUR DETAILS</b></p>
+            <div class="input-group mb-3">
+                <input type="text" id="registrationNumberInput" class="form-control" placeholder="Enter Registration Number" required>
+                <button class="btn btn-primary" onclick="fetchStudentDetails()">Submit</button>
+            </div>
+        </div>
+
+        <!-- Student Details Section -->
+        <div class="details-section" id="detailsSection" style="display: none;">
+            <div class="card p-4">
+                <h4 class="text-center mb-4">Student Details</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Student Name:</strong> <span id="studentName"></span></p>
+                        <p><strong>Registration Number:</strong> <span id="registrationNumber"></span></p>
+                        <p><strong>Institution Name:</strong> <span id="institutionName"></span></p>
+                        <p><strong>Internship Status:</strong> <span id="internshipStatus"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Certificate Number:</strong> <span id="certificateNumber"></span></p>
+                        <p><strong>Course Name:</strong> <span id="courseName"></span></p>
+                        <p><strong>Course Completed Status:</strong> <span id="courseCompletedStatus"></span></p>
+                        <p><strong>Pass or Fail:</strong> <span id="passOrFail"></span></p>
+                        <p><strong>Grade:</strong> <span id="grade"></span></p>
+                    </div>
+                </div>
+                <button class="btn btn-success mt-3" onclick="downloadPDF()">Download Certificate as PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchStudentDetails() {
+            const registrationNumber = document.getElementById('registrationNumberInput').value;
+    
+            try {
+                const response = await fetch(`http://localhost:3000/api/student/${registrationNumber}`);
+                const detailsSection = document.getElementById('detailsSection');
+                
+                if (response.ok) {
+                    const student = await response.json();
+                    document.getElementById('studentName').innerText = student.studentName;
+                    document.getElementById('registrationNumber').innerText = student.registrationNumber;
+                    document.getElementById('institutionName').innerText = student.instituteName;
+                    document.getElementById('internshipStatus').innerText = student.internshipStatus;
+                    document.getElementById('certificateNumber').innerText = student.certificationNumber;
+                    document.getElementById('courseName').innerText = student.courseName;
+                    document.getElementById('courseCompletedStatus').innerText = student.courseCompletedStatus;
+                    document.getElementById('passOrFail').innerText = student.passOrFail;
+                    document.getElementById('grade').innerText = student.grade;
+                    detailsSection.style.display = 'block';
+                } else {
+                    alert('Student not found.');
+                    detailsSection.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error fetching student data:', error);
+                alert('Error fetching student data.');
+            }
+        }
+    </script>
+    
+    <script>
+        async function downloadPDF() {
+            const registrationNumber = document.getElementById('registrationNumber').innerText;
+            
+            if (!registrationNumber) {
+                alert('No registration number found for PDF generation.');
+                return;
+            }
+    
+            try {
+                // Use fetch with 'blob' response type for PDF download
+                const response = await fetch(`http://localhost:3000/api/student/pdf/${registrationNumber}`, {
+                    method: 'GET',
+                });
+    
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'student_verification.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert('Failed to generate PDF.');
+                }
+            } catch (error) {
+                console.error('Error downloading PDF:', error);
+                alert('Error downloading PDF.');
+            }
+        }
+    </script>
+    
+    
+</body>
+</html>
